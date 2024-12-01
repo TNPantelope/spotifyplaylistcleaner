@@ -1,0 +1,18 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "MSVC",
+	"compiler-id" : "MSVC",
+	"compiler-simulate-id" : "",
+	"config" : "Debug",
+	"cxx-modules" : {},
+	"dir-cur-bld" : "E:/PersonalProjects/spotifyplaylistcleaner/cmake-build-debug",
+	"dir-cur-src" : "E:/PersonalProjects/spotifyplaylistcleaner",
+	"dir-top-bld" : "E:/PersonalProjects/spotifyplaylistcleaner/cmake-build-debug",
+	"dir-top-src" : "E:/PersonalProjects/spotifyplaylistcleaner",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : [],
+	"language" : "CXX",
+	"linked-target-dirs" : [],
+	"module-dir" : "E:/PersonalProjects/spotifyplaylistcleaner/cmake-build-debug/CMakeFiles/spotifyplaylistcleaner.dir"
+}
