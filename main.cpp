@@ -48,18 +48,16 @@ std::string getAccessToken() {
         curl_easy_cleanup(curl);
 
         accessToken = readBuffer.substr(17, 115);
-        // prints
-        //std::cout << readBuffer << std::endl;
-        //std::cout << accessToken << std::endl;
 
         return accessToken;
     }
 }
 
-void reqArtistData(std::string accessToken) {
+
+std::string getLikedSongs(std::string accessToken) {
     CURL *curl;
     CURLcode res;
-    std::string artistData;
+    std::string LikedSongsData;
 
     std::string AuthBearer = "Authorization: Bearer ";
     std::string authBearerToken = AuthBearer + accessToken;
@@ -73,25 +71,54 @@ void reqArtistData(std::string accessToken) {
     curl = curl_easy_init();
     if(curl) {
 
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.spotify.com/v1/artists/2YZyLoL8N0Wb9xBt1NhZWg");
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.spotify.com/v1/me/tracks");
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerAuthToken);
 
 
         // uses our function to process the data
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
         // stores the data in readBuffer
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &artistData);
-
-        // frees all headers
-        //curl_slist_free_all(headers);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &LikedSongsData);
 
         // actually performs the request
         res = curl_easy_perform(curl);
-
         curl_easy_cleanup(curl);
 
-        // prints
-        std::cout << artistData << std::endl;
+
+        return LikedSongsData;
+    }
+}
+
+std::string getPlaylistData(std::string accessToken) {
+    CURL *curl;
+    CURLcode res;
+    std::string playlistData;
+
+    std::string AuthBearer = "Authorization: Bearer ";
+    std::string authBearerToken = AuthBearer + accessToken;
+
+
+    // making our header
+    headerAuthToken = curl_slist_append(NULL, authBearerToken.c_str());
+
+
+    // initializing curl > if successfull
+    curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.spotify.com/v1/playlists/09uKR1njKVo82C7vTpnQXu");
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerAuthToken);
+
+        // uses our function to process the data
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
+        // stores the data in readBuffer
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &playlistData);
+
+        // actually performs the request
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+
+        return playlistData;
     }
 }
 
@@ -104,13 +131,17 @@ int main()
 
     // get the access token
     std::string accessToken = getAccessToken();
+    // passing token and getting playlist good but dont want in liked list
+    std::string playlistData = getPlaylistData(accessToken);
+    std::string likedSongs = getLikedSongs(accessToken);
 
-    // print the token cuz why not
-    std::cout << accessToken << std::endl;
 
-    // passing token and getting artist data Kendrick
-    reqArtistData(accessToken);
-    
+    //std::cout << accessToken << std::endl;
+    std::cout << playlistData << std::endl;
+    std::cout << likedSongs << std::endl;
+
+
+
 
     return 0;
 }
