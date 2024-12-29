@@ -1,4 +1,6 @@
 
 # Spotify Playlist Manager
-A tool that removes like songs from spotify playlists
+Program that takes removes liked songs from playlist.
+
+Maybe later down the line extend the program to sort songs into playlists, idk tho.
 
