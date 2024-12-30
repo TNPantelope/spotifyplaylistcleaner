@@ -26,19 +26,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 11,
+				"line" : 17,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 14,
+				"line" : 24,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 4,
+				"line" : 19,
 				"parent" : 0
 			}
 		]
@@ -52,11 +52,27 @@
 					"fragment" : "-g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk -mmacosx-version-min=15.1 -fcolor-diagnostics"
 				}
 			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 2,
+					"define" : "CPPREST_FORCE_HTTP_CLIENT_ASIO"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "CPPREST_FORCE_HTTP_LISTENER_ASIO"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "CPPREST_NO_SSL_LEAK_SUPPRESS"
+				}
+			],
 			"includes" : 
 			[
 				{
 					"backtrace" : 3,
-					"path" : "/usr/local/opt/curl/include/curl/curl.h"
+					"isSystem" : true,
+					"path" : "/opt/homebrew/include"
 				}
 			],
 			"language" : "CXX",
@@ -88,8 +104,27 @@
 				"role" : "flags"
 			},
 			{
+				"fragment" : "-Wl,-rpath,/opt/homebrew/lib",
+				"role" : "libraries"
+			},
+			{
 				"backtrace" : 2,
-				"fragment" : "-lcurl",
+				"fragment" : "/Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk/usr/lib/libcurl.tbd",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "/opt/homebrew/lib/libcpprest.2.10.dylib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "/opt/homebrew/lib/libssl.dylib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "/opt/homebrew/lib/libcrypto.dylib",
 				"role" : "libraries"
 			}
 		],

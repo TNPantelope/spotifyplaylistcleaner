@@ -92,6 +92,10 @@ spotifyplaylistcleaner_EXTERNAL_OBJECTS =
 
 spotifyplaylistcleaner: CMakeFiles/spotifyplaylistcleaner.dir/main.cpp.o
 spotifyplaylistcleaner: CMakeFiles/spotifyplaylistcleaner.dir/build.make
+spotifyplaylistcleaner: /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk/usr/lib/libcurl.tbd
+spotifyplaylistcleaner: /opt/homebrew/lib/libcpprest.2.10.dylib
+spotifyplaylistcleaner: /opt/homebrew/lib/libssl.dylib
+spotifyplaylistcleaner: /opt/homebrew/lib/libcrypto.dylib
 spotifyplaylistcleaner: CMakeFiles/spotifyplaylistcleaner.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/tamimnorani/projects/personal/spotifyplaylistcleaner/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable spotifyplaylistcleaner"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/spotifyplaylistcleaner.dir/link.txt --verbose=$(VERBOSE)

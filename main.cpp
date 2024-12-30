@@ -2,8 +2,6 @@
 #include <string>
 #include <curl/curl.h>
 
-
-
 // helper function to process the data we curl up
 static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
     std::string *str = static_cast<std::string*>(userp);
@@ -136,7 +134,7 @@ int main()
     std::string likedSongs = getLikedSongs(accessToken);
 
 
-    //std::cout << accessToken << std::endl;
+    std::cout << accessToken << std::endl;
     std::cout << playlistData << std::endl;
     std::cout << likedSongs << std::endl;
 
