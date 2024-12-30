@@ -129,6 +129,30 @@ spotifyplaylistcleaner/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/spotifyplaylistcleaner.dir/build.make CMakeFiles/spotifyplaylistcleaner.dir/build
 .PHONY : spotifyplaylistcleaner/fast
 
+auth_server.o: auth_server.cpp.o
+.PHONY : auth_server.o
+
+# target to build an object file
+auth_server.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/spotifyplaylistcleaner.dir/build.make CMakeFiles/spotifyplaylistcleaner.dir/auth_server.cpp.o
+.PHONY : auth_server.cpp.o
+
+auth_server.i: auth_server.cpp.i
+.PHONY : auth_server.i
+
+# target to preprocess a source file
+auth_server.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/spotifyplaylistcleaner.dir/build.make CMakeFiles/spotifyplaylistcleaner.dir/auth_server.cpp.i
+.PHONY : auth_server.cpp.i
+
+auth_server.s: auth_server.cpp.s
+.PHONY : auth_server.s
+
+# target to generate assembly for a file
+auth_server.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/spotifyplaylistcleaner.dir/build.make CMakeFiles/spotifyplaylistcleaner.dir/auth_server.cpp.s
+.PHONY : auth_server.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... spotifyplaylistcleaner"
+	@echo "... auth_server.o"
+	@echo "... auth_server.i"
+	@echo "... auth_server.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

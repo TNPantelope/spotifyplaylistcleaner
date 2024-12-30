@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <curl/curl.h>
+#include "auth_server.h"
 
 // helper function to process the data we curl up
 static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
@@ -120,23 +121,57 @@ std::string getPlaylistData(std::string accessToken) {
     }
 }
 
+void webserver() {
+    
+    std::string client_id = "a24ea60b20244fd299abb97fc9ce2ce5";
+    std::string redirect_uri = "http://localhost:8888/callback";
+    std::string scope = "user-read-private user-read-email";
+
+    // creating the server
+    AuthServer server(U("http://localhost:8888/callback"));
+    server.start();
+    std::cout << "Server started and listening..." << std::endl;
+
+    // building the url
+    std::string auth_url =
+        "https://accounts.spotify.com/authorize?"
+        "client_id=" + client_id +
+        "&response_type=code"
+        "&redirect_uri=" + redirect_uri +
+        "&scope=" + scope;
+
+    std::cout << "open this url:\n" << auth_url << std::endl;
+
+    // waiting for user to authenticate
+    std::cout << "waiting for auth, press enter to get code" << std::endl;
+    std::cin.get();
+
+    // after user presses enter
+    auto received_code = server.get_auth_code();
+    if (!received_code.empty()) {
+        std::cout << "auth code: " << utility::conversions::to_utf8string(received_code) << std::endl;
+    } else {
+        std::cout << "didnt get a code" << std::endl;
+    }
+
+    server.stop();
+}
 
 int main()
 {
-    /* CREATING NEW TOKEN EACH TIME PROGRAM RUNS, FIX? IDK*/
 
+    webserver();
 
-
-    // get the access token
     std::string accessToken = getAccessToken();
-    // passing token and getting playlist good but dont want in liked list
     std::string playlistData = getPlaylistData(accessToken);
     std::string likedSongs = getLikedSongs(accessToken);
 
 
-    std::cout << accessToken << std::endl;
-    std::cout << playlistData << std::endl;
-    std::cout << likedSongs << std::endl;
+
+
+    //std::cout << accessToken << std::endl;
+    //std::cout << playlistData << std::endl;
+    //std::cout << likedSongs << std::endl;
 
 
 

@@ -14,7 +14,9 @@ find_package(CURL REQUIRED)
 
 find_package(cpprestsdk REQUIRED)
 
-add_executable(spotifyplaylistcleaner main.cpp)
+add_executable(spotifyplaylistcleaner main.cpp
+        auth_server.cpp
+        auth_server.h)
 
 include_directories(
         ${CURL_INCLUDE_DIR}

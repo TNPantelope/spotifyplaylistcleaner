@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Users/tamimnorani/projects/personal/spotifyplaylistcleaner/auth_server.cpp" "CMakeFiles/spotifyplaylistcleaner.dir/auth_server.cpp.o" "gcc" "CMakeFiles/spotifyplaylistcleaner.dir/auth_server.cpp.o.d"
   "/Users/tamimnorani/projects/personal/spotifyplaylistcleaner/main.cpp" "CMakeFiles/spotifyplaylistcleaner.dir/main.cpp.o" "gcc" "CMakeFiles/spotifyplaylistcleaner.dir/main.cpp.o.d"
   )
 

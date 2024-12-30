@@ -81,12 +81,12 @@ clean: CMakeFiles/spotifyplaylistcleaner.dir/clean
 CMakeFiles/spotifyplaylistcleaner.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/spotifyplaylistcleaner.dir/build.make CMakeFiles/spotifyplaylistcleaner.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/spotifyplaylistcleaner.dir/build.make CMakeFiles/spotifyplaylistcleaner.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/tamimnorani/projects/personal/spotifyplaylistcleaner/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target spotifyplaylistcleaner"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/tamimnorani/projects/personal/spotifyplaylistcleaner/cmake-build-debug/CMakeFiles --progress-num=1,2,3 "Built target spotifyplaylistcleaner"
 .PHONY : CMakeFiles/spotifyplaylistcleaner.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/spotifyplaylistcleaner.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/tamimnorani/projects/personal/spotifyplaylistcleaner/cmake-build-debug/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/tamimnorani/projects/personal/spotifyplaylistcleaner/cmake-build-debug/CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/spotifyplaylistcleaner.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/tamimnorani/projects/personal/spotifyplaylistcleaner/cmake-build-debug/CMakeFiles 0
 .PHONY : CMakeFiles/spotifyplaylistcleaner.dir/rule

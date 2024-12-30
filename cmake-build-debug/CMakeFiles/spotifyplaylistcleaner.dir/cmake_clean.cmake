@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/spotifyplaylistcleaner.dir/auth_server.cpp.o"
+  "CMakeFiles/spotifyplaylistcleaner.dir/auth_server.cpp.o.d"
   "CMakeFiles/spotifyplaylistcleaner.dir/main.cpp.o"
   "CMakeFiles/spotifyplaylistcleaner.dir/main.cpp.o.d"
   "spotifyplaylistcleaner"
