@@ -83,6 +83,8 @@ std::string getLikedSongs(std::string accessToken) {
     CURLcode res;
     std::string LikedSongsData;
 
+    int offset = 0;
+    int limit = 20;
 
 
     std::string GrantType = "Authorization: Bearer ";
@@ -91,15 +93,22 @@ std::string getLikedSongs(std::string accessToken) {
     // making our header
     header = curl_slist_append(NULL, authBearerToken.c_str());
 
+    //building endpoint url for limit and offset
+    std::string likedsongsurl =
+        "https://api.spotify.com/v1/me/tracks?"
+        "offset=" + std::to_string(offset) +
+        "&limit=" + std::to_string(limit);
+
     curl = curl_easy_init();
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.spotify.com/v1/me");
+        curl_easy_setopt(curl, CURLOPT_URL, likedsongsurl.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &LikedSongsData);
 
         res = curl_easy_perform(curl);
+        curl_slist_free_all(header);
         curl_easy_cleanup(curl);
 
         return LikedSongsData;
@@ -133,6 +142,7 @@ std::string getPlaylistData(std::string accessToken) {
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &playlistData);
 
         res = curl_easy_perform(curl);
+        curl_slist_free_all(header);
         curl_easy_cleanup(curl);
 
         return playlistData;
@@ -144,7 +154,7 @@ std::string webserver() {
 
     std::string client_id = "a24ea60b20244fd299abb97fc9ce2ce5";
     std::string redirect_uri = "http://localhost:8888/callback";
-    std::string scope = "user-read-private user-read-email user-library-read";
+    std::string scope = "user-read-private%20user-read-email%20user-library-read";
 
     // creating the server
     AuthServer server(U("http://localhost:8888/callback"));
@@ -216,6 +226,7 @@ std::string oAuth_to_token(std::string oAuth_code) {
 
         // actually performs the request
         res = curl_easy_perform(curl);
+        curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
 
         // extract the token from readbuffer
