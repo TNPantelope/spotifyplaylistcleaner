@@ -16,7 +16,6 @@ static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
     return size * nmemb;
 }
 
-
 static std::string base64_encode(const std::string &in) {
     std::string out;
     static const std::string base64_chars =
@@ -36,154 +35,6 @@ static std::string base64_encode(const std::string &in) {
     if (valb > -6) out.push_back(base64_chars[((val << 8) >> (valb + 8)) & 0x3F]);
     while (out.size() % 4) out.push_back('=');
     return out;
-}
-
-
-
-
-std::vector<std::string> getLikedSongs(std::string accessToken) {
-    struct curl_slist *header = NULL;
-    CURL *curl;
-    CURLcode res;
-    std::string readBuffer;
-    std::vector<std::string> LikedSongsData;
-
-    std::string GrantType = "Authorization: Bearer ";
-    std::string authBearerToken = GrantType + accessToken;
-
-    // making our header
-    header = curl_slist_append(NULL, authBearerToken.c_str());
-
-
-    curl = curl_easy_init();
-
-    int offset = 0;
-    int limit = 50;
-    int total_songs = 0;
-    bool first_request = true;
-
-
-    if (curl) {
-        do {
-            readBuffer.clear();
-            //building endpoint url for limit and offset
-            std::string likedsongsurl =
-                    "https://api.spotify.com/v1/me/tracks?"
-                    "offset=" + std::to_string(offset) +
-                    "&limit=" + std::to_string(limit);
-
-            curl_easy_setopt(curl, CURLOPT_URL, likedsongsurl.c_str());
-            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-            res = curl_easy_perform(curl);
-
-            // json parse bs
-            try {
-                json response = json::parse(readBuffer);
-
-                // get the total number of liked songs on the first request
-                if (first_request) {
-                    total_songs = response["total"];
-                    first_request = false;
-                }
-                // pull out song ids from the items array
-                for (auto& item : response["items"]) {
-                    std::string songID = item["track"]["id"];
-                    LikedSongsData.push_back(songID);
-                }
-
-                // update the offset for the next batch
-                offset += limit;
-
-            } catch(json::exception e) {
-                break;
-            }
-
-        } while (offset < total_songs);
-
-        curl_slist_free_all(header);
-        curl_easy_cleanup(curl);
-
-        return LikedSongsData;
-    }
-}
-
-
-std::vector<std::string> getPlaylistData(std::string accessToken) {
-    struct curl_slist *header = NULL;
-
-    CURL *curl;
-    CURLcode res;
-    std::string readBuffer;
-
-    std::vector<std::string> playlistData;
-
-    std::string GrantType = "Authorization: Bearer ";
-    std::string authBearerToken = GrantType + accessToken;
-
-
-    // making our header
-    header = curl_slist_append(NULL, authBearerToken.c_str());
-
-
-    int offset = 0;
-    int limit = 1;
-    int total_songs = 0;
-    bool first_request = true;
-
-    std::string playlist_id = "09uKR1njKVo82C7vTpnQXu";
-
-    curl = curl_easy_init();
-    if (curl) {
-        do {
-            readBuffer.clear();
-
-            // Build URL with the right parameters
-            std::string playlistUrl =
-                    "https://api.spotify.com/v1/playlists"
-                    "/" + playlist_id +
-                    "/tracks?"
-                    "offset=" + std::to_string(offset) +
-                    "&limit=" + std::to_string(limit);
-            curl_easy_setopt(curl, CURLOPT_URL, playlistUrl.c_str());
-            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-            res = curl_easy_perform(curl);
-
-            // json parse bs
-            try {
-                json response = json::parse(readBuffer);
-
-                // get the total number of liked songs on the first request
-                if (first_request) {
-                    total_songs = response["total"];
-                    first_request = false;
-                }
-                // pull out song ids from the items array
-                for (auto &item: response["items"]) {
-                    std::string songID = item["track"]["id"];
-                    playlistData.push_back(songID);
-                }
-
-                // update the offset for the next batch
-                offset += limit;
-            } catch (json::exception e) {
-                break;
-            }
-        } while (offset < total_songs);
-
-        curl_slist_free_all(header);
-        curl_easy_cleanup(curl);
-
-        // test print entire response
-        //std::cout << readBuffer << std::endl;
-
-        return playlistData;
-    }
 }
 
 std::string webserver() {
@@ -268,29 +119,202 @@ std::string oAuth_to_token(std::string oAuth_code) {
 
         return oAuth_Token;
     }
+    return oAuth_Token;
 }
+
+std::vector<std::string> getLikedSongs(std::string accessToken) {
+    struct curl_slist *header = NULL;
+    CURL *curl;
+    CURLcode res;
+    std::string readBuffer;
+    std::vector<std::string> LikedSongsData;
+
+    std::string GrantType = "Authorization: Bearer ";
+    std::string authBearerToken = GrantType + accessToken;
+
+    // making our header
+    header = curl_slist_append(NULL, authBearerToken.c_str());
+
+
+    curl = curl_easy_init();
+
+    int offset = 0;
+    int limit = 50;
+    int total_songs = 0;
+    bool first_request = true;
+
+
+    if (curl) {
+        do {
+            readBuffer.clear();
+            //building endpoint url for limit and offset
+            std::string likedsongsurl =
+                    "https://api.spotify.com/v1/me/tracks?"
+                    "offset=" + std::to_string(offset) +
+                    "&limit=" + std::to_string(limit);
+
+            curl_easy_setopt(curl, CURLOPT_URL, likedsongsurl.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+            res = curl_easy_perform(curl);
+
+            // json parse bs
+            try {
+                json response = json::parse(readBuffer);
+
+                // get the total number of liked songs on the first request
+                if (first_request) {
+                    total_songs = response["total"];
+                    first_request = false;
+                }
+                // pull out song ids from the items array
+                for (auto& item : response["items"]) {
+                    std::string songID = item["track"]["id"];
+                    LikedSongsData.push_back(songID);
+                }
+
+                // update the offset for the next batch
+                offset += limit;
+
+            } catch(json::exception e) {
+                break;
+            }
+
+        } while (offset < total_songs);
+
+        curl_slist_free_all(header);
+        curl_easy_cleanup(curl);
+
+        return LikedSongsData;
+    }
+    return LikedSongsData;
+}
+
+std::vector<std::string> getPlaylistData(std::string accessToken, std::string playlistID) {
+    struct curl_slist *header = NULL;
+
+    CURL *curl;
+    CURLcode res;
+    std::string readBuffer;
+
+    std::vector<std::string> playlistData;
+
+    std::string GrantType = "Authorization: Bearer ";
+    std::string authBearerToken = GrantType + accessToken;
+
+    // making our header
+    header = curl_slist_append(NULL, authBearerToken.c_str());
+
+    int offset = 0;
+    int limit = 50;
+    int total_songs = 0;
+    bool first_request = true;
+
+
+    std::string playlist_id = playlistID;
+
+    curl = curl_easy_init();
+    if (curl) {
+        do {
+            readBuffer.clear();
+
+            // Build URL with the right parameters
+            std::string playlistUrl =
+                    "https://api.spotify.com/v1/playlists"
+                    "/" + playlist_id +
+                    "/tracks?"
+                    "offset=" + std::to_string(offset) +
+                    "&limit=" + std::to_string(limit);
+            curl_easy_setopt(curl, CURLOPT_URL, playlistUrl.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+            res = curl_easy_perform(curl);
+
+            // in case song doesnt have id (removed from spotify but still in playlist)
+            if (readBuffer.empty()) {
+                std::cout << "Empty response received!" << std::endl;
+                break;
+            }
+
+            // json parse bs
+            try {
+                json response = json::parse(readBuffer);
+
+                // get the total number of liked songs on the first request
+                if (first_request) {
+                    total_songs = response["total"];
+
+                    first_request = false;
+                }
+                // pull out song ids from the items array
+                for (auto &item: response["items"]) {
+                    if (!item["track"].is_null() && !item["track"]["id"].is_null()) {
+                        std::string songID = item["track"]["id"];
+                        playlistData.push_back(songID);
+                    }
+                }
+
+                // update the offset for the next batch
+                offset += limit;
+
+
+
+            } catch (json::exception e) {
+                break;
+            }
+        } while (offset < total_songs);
+
+        curl_slist_free_all(header);
+        curl_easy_cleanup(curl);
+
+
+
+        return playlistData;
+    }
+    return playlistData;
+}
+
+std::vector<std::string> compare_lists(std::vector<std::string> likedsongslist, std::vector<std::string> playlistsongslist) {
+    std::vector<std::string> matchingSongs;
+
+    for (const std::string& likedSong : likedsongslist) {
+        for (const std::string& playlistSong : playlistsongslist) {
+            if (likedSong == playlistSong) {
+                matchingSongs.push_back(likedSong);
+                break;
+            }
+        }
+    }
+    return matchingSongs;
+}
+
 
 int main()
 {
+
+    std::string playlistID = "1H9FE8NW6n3BObXmnjNrb7";
+
     //gets oauth code using webserver func, passes that into oAuth to token, stores that token in oAuthToken
     std::string oAuthToken = oAuth_to_token(webserver());
 
     // pass the auth token to these various funtions
-    std::vector<std::string> playlistData = getPlaylistData(oAuthToken);
+    std::vector<std::string> playlistData = getPlaylistData(oAuthToken, playlistID);
     std::vector<std::string> likedSongs = getLikedSongs(oAuthToken);
 
+    std::vector<std::string> matchingSongs = compare_lists(likedSongs, playlistData);
+
+
+
     // Za prints
-    std::cout << playlistData.size() << std::endl;
-    for (auto playlist_songID : playlistData) {
-        std::cout << playlist_songID << std::endl;
-    }
+    std::cout << "how many matching songs: " << matchingSongs.size() << std::endl;
 
-    std::cout << "/////////////////////////////////// " << std::endl;
+    std::cout << "how many songs in playlist: " << playlistData.size() << std::endl;
 
-    std::cout << likedSongs.size() << std::endl;
-    //for (auto& liked_songID : likedSongs) {
-        //std::cout << liked_songID << std::endl;
-    //}
+    std::cout << "how many liked songs: " << likedSongs.size() << std::endl;
 
     return 0;
 }
