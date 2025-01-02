@@ -6,6 +6,9 @@
 
 using json = nlohmann::json;
 
+std::string client_id = "a24ea60b20244fd299abb97fc9ce2ce5";
+std::string client_secret = "dd43497448614f0dbd9469726b50f673";
+
 // helper function to process the data we curl up
 static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
     std::string *str = static_cast<std::string*>(userp);
@@ -35,56 +38,15 @@ static std::string base64_encode(const std::string &in) {
     return out;
 }
 
-std::string getAccessToken() {
-
-    struct curl_slist *header = NULL;
-
-    CURL *curl;
-    CURLcode res;
-    std::string readBuffer;
-    std::string accessToken;
-
-    // making our header
-    header = curl_slist_append(NULL, "Content-Type: application/x-www-form-urlencoded");
-
-    // id and secret
-    char *client_id_secret=
-        "grant_type=client_credentials"
-        "&client_id=a24ea60b20244fd299abb97fc9ce2ce5"
-        "&client_secret=dd43497448614f0dbd9469726b50f673";
 
 
-    curl = curl_easy_init();
-    if(curl) {
 
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, client_id_secret);
-        curl_easy_setopt(curl, CURLOPT_URL, "https://accounts.spotify.com/api/token");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
-
-        // uses our function to process the data
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
-        // stores the data in readBuffer
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-        // actually performs the request
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-
-        accessToken = readBuffer.substr(17, 115);
-
-        return accessToken;
-    }
-
-}
-
-
-std::string getLikedSongs(std::string accessToken) {
-
+std::vector<std::string> getLikedSongs(std::string accessToken) {
     struct curl_slist *header = NULL;
     CURL *curl;
     CURLcode res;
-    std::string LikedSongsData;
     std::string readBuffer;
+    std::vector<std::string> LikedSongsData;
 
     std::string GrantType = "Authorization: Bearer ";
     std::string authBearerToken = GrantType + accessToken;
@@ -92,49 +54,71 @@ std::string getLikedSongs(std::string accessToken) {
     // making our header
     header = curl_slist_append(NULL, authBearerToken.c_str());
 
-    bool got_entire_list = false;
 
     curl = curl_easy_init();
-    while (curl && !got_entire_list) {
 
-        int offset = 0;
-        int limit = 50;
-        int i = 0;
+    int offset = 0;
+    int limit = 50;
+    int total_songs = 0;
+    bool first_request = true;
 
-        //building endpoint url for limit and offset
-        std::string likedsongsurl =
-            "https://api.spotify.com/v1/me/tracks?"
-            "offset=" + std::to_string(offset) +
-            "&limit=" + std::to_string(limit);
 
-        curl_easy_setopt(curl, CURLOPT_URL, likedsongsurl.c_str());
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+    if (curl) {
+        do {
+            readBuffer.clear();
+            //building endpoint url for limit and offset
+            std::string likedsongsurl =
+                    "https://api.spotify.com/v1/me/tracks?"
+                    "offset=" + std::to_string(offset) +
+                    "&limit=" + std::to_string(limit);
 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+            curl_easy_setopt(curl, CURLOPT_URL, likedsongsurl.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
-        res = curl_easy_perform(curl);
+            res = curl_easy_perform(curl);
+
+            // json parse bs
+            try {
+                json response = json::parse(readBuffer);
+
+                // get the total number of liked songs on the first request
+                if (first_request) {
+                    total_songs = response["total"];
+                    first_request = false;
+                }
+                // pull out song ids from the items array
+                for (auto& item : response["items"]) {
+                    std::string songID = item["track"]["id"];
+                    LikedSongsData.push_back(songID);
+                }
+
+                // update the offset for the next batch
+                offset += limit;
+
+            } catch(json::exception e) {
+                break;
+            }
+
+        } while (offset < total_songs);
+
         curl_slist_free_all(header);
         curl_easy_cleanup(curl);
 
-
-
-
-        LikedSongsData = readBuffer;
         return LikedSongsData;
-
-        i++;
-        offset = (50 * i);
     }
 }
 
-std::string getPlaylistData(std::string accessToken) {
 
+std::vector<std::string> getPlaylistData(std::string accessToken) {
     struct curl_slist *header = NULL;
 
     CURL *curl;
     CURLcode res;
-    std::string playlistData;
+    std::string readBuffer;
+
+    std::vector<std::string> playlistData;
 
     std::string GrantType = "Authorization: Bearer ";
     std::string authBearerToken = GrantType + accessToken;
@@ -144,28 +128,66 @@ std::string getPlaylistData(std::string accessToken) {
     header = curl_slist_append(NULL, authBearerToken.c_str());
 
 
+    int offset = 0;
+    int limit = 1;
+    int total_songs = 0;
+    bool first_request = true;
+
+    std::string playlist_id = "09uKR1njKVo82C7vTpnQXu";
 
     curl = curl_easy_init();
-    if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.spotify.com/v1/playlists/09uKR1njKVo82C7vTpnQXu");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+    if (curl) {
+        do {
+            readBuffer.clear();
 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
+            // Build URL with the right parameters
+            std::string playlistUrl =
+                    "https://api.spotify.com/v1/playlists"
+                    "/" + playlist_id +
+                    "/tracks?"
+                    "offset=" + std::to_string(offset) +
+                    "&limit=" + std::to_string(limit);
+            curl_easy_setopt(curl, CURLOPT_URL, playlistUrl.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &playlistData);
+            res = curl_easy_perform(curl);
 
-        res = curl_easy_perform(curl);
+            // json parse bs
+            try {
+                json response = json::parse(readBuffer);
+
+                // get the total number of liked songs on the first request
+                if (first_request) {
+                    total_songs = response["total"];
+                    first_request = false;
+                }
+                // pull out song ids from the items array
+                for (auto &item: response["items"]) {
+                    std::string songID = item["track"]["id"];
+                    playlistData.push_back(songID);
+                }
+
+                // update the offset for the next batch
+                offset += limit;
+            } catch (json::exception e) {
+                break;
+            }
+        } while (offset < total_songs);
+
         curl_slist_free_all(header);
         curl_easy_cleanup(curl);
+
+        // test print entire response
+        //std::cout << readBuffer << std::endl;
 
         return playlistData;
     }
-
 }
 
 std::string webserver() {
 
-    std::string client_id = "a24ea60b20244fd299abb97fc9ce2ce5";
     std::string redirect_uri = "http://localhost:8888/callback";
     std::string scope = "user-read-private%20user-read-email%20user-library-read";
 
@@ -207,8 +229,6 @@ std::string oAuth_to_token(std::string oAuth_code) {
 
 
     // making our headers
-    std::string client_id = "a24ea60b20244fd299abb97fc9ce2ce5";
-    std::string client_secret = "dd43497448614f0dbd9469726b50f673";
     std::string credentials = client_id + ":" + client_secret;
 
     // Create the Authorization header with Basic auth
@@ -256,12 +276,21 @@ int main()
     std::string oAuthToken = oAuth_to_token(webserver());
 
     // pass the auth token to these various funtions
-    std::string playlistData = getPlaylistData(oAuthToken);
-    std::string likedSongs = getLikedSongs(oAuthToken);
+    std::vector<std::string> playlistData = getPlaylistData(oAuthToken);
+    std::vector<std::string> likedSongs = getLikedSongs(oAuthToken);
 
     // Za prints
-    std::cout << "playlist data" << playlistData << std::endl;
-    std::cout << "liked songs" << likedSongs << std::endl;
+    std::cout << playlistData.size() << std::endl;
+    for (auto playlist_songID : playlistData) {
+        std::cout << playlist_songID << std::endl;
+    }
+
+    std::cout << "/////////////////////////////////// " << std::endl;
+
+    std::cout << likedSongs.size() << std::endl;
+    //for (auto& liked_songID : likedSongs) {
+        //std::cout << liked_songID << std::endl;
+    //}
 
     return 0;
 }
