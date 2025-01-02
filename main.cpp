@@ -2,6 +2,9 @@
 #include <string>
 #include <curl/curl.h>
 #include "auth_server.h"
+#include "json.hpp" // for JSON parsing
+
+using json = nlohmann::json;
 
 // helper function to process the data we curl up
 static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
@@ -78,14 +81,10 @@ std::string getAccessToken() {
 std::string getLikedSongs(std::string accessToken) {
 
     struct curl_slist *header = NULL;
-
     CURL *curl;
     CURLcode res;
     std::string LikedSongsData;
-
-    int offset = 0;
-    int limit = 20;
-
+    std::string readBuffer;
 
     std::string GrantType = "Authorization: Bearer ";
     std::string authBearerToken = GrantType + accessToken;
@@ -93,25 +92,39 @@ std::string getLikedSongs(std::string accessToken) {
     // making our header
     header = curl_slist_append(NULL, authBearerToken.c_str());
 
-    //building endpoint url for limit and offset
-    std::string likedsongsurl =
-        "https://api.spotify.com/v1/me/tracks?"
-        "offset=" + std::to_string(offset) +
-        "&limit=" + std::to_string(limit);
+    bool got_entire_list = false;
 
     curl = curl_easy_init();
-    if(curl) {
+    while (curl && !got_entire_list) {
+
+        int offset = 0;
+        int limit = 50;
+        int i = 0;
+
+        //building endpoint url for limit and offset
+        std::string likedsongsurl =
+            "https://api.spotify.com/v1/me/tracks?"
+            "offset=" + std::to_string(offset) +
+            "&limit=" + std::to_string(limit);
+
         curl_easy_setopt(curl, CURLOPT_URL, likedsongsurl.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &LikedSongsData);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
         res = curl_easy_perform(curl);
         curl_slist_free_all(header);
         curl_easy_cleanup(curl);
 
+
+
+
+        LikedSongsData = readBuffer;
         return LikedSongsData;
+
+        i++;
+        offset = (50 * i);
     }
 }
 
