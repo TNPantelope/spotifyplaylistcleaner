@@ -40,7 +40,7 @@ static std::string base64_encode(const std::string &in) {
 std::string webserver() {
 
     std::string redirect_uri = "http://localhost:8888/callback";
-    std::string scope = "user-read-private%20user-read-email%20user-library-read";
+    std::string scope = "user-read-private%20user-read-email%20user-library-read%20playlist-modify-public%20playlist-read-private%20playlist-modify-private";;
 
     // creating the server
     AuthServer server(U("http://localhost:8888/callback"));
@@ -56,11 +56,11 @@ std::string webserver() {
 
     std::cout << "open this url:\n" << auth_url << std::endl;
 
-    // waiting for user to authenticate
-    std::cout << "waiting for auth, press enter to get code" << std::endl;
+    // waiting for user to go authenticate
+    std::cout << "waiting for auth, press enter to continue" << std::endl;
     std::cin.get();
 
-    // after user presses enter
+    // after enter
     auto received_oAuth_code = server.get_auth_code();
     if (received_oAuth_code.empty()) {
         std::cout << "didnt get a code" << std::endl;
@@ -114,12 +114,16 @@ std::string oAuth_to_token(std::string oAuth_code) {
         curl_easy_cleanup(curl);
 
         // extract the token from readbuffer
-        //std::cout << "Response: " << readBuffer << std::endl;
-        oAuth_Token = readBuffer.substr(17, 278);
+        try {
+            json response = json::parse(readBuffer);
+            oAuth_Token = response["access_token"];
 
-        return oAuth_Token;
+            return oAuth_Token;
+        } catch (json::exception& e) {
+            return "";
+        }
     }
-    return oAuth_Token;
+    return "";
 }
 
 std::vector<std::string> getLikedSongs(std::string accessToken) {
@@ -292,6 +296,105 @@ std::vector<std::string> compare_lists(std::vector<std::string> likedsongslist, 
     return matchingSongs;
 }
 
+std::string getUsername(std::string accessToken) {
+    std::string userName;
+    struct curl_slist *header = NULL;
+    CURL *curl;
+    CURLcode res;
+    std::string readBuffer;
+    bool first_request = true;
+
+    std::string GrantType = "Authorization: Bearer ";
+    std::string authBearerToken = GrantType + accessToken;
+
+    // making our header
+    header = curl_slist_append(NULL, authBearerToken.c_str());
+    curl = curl_easy_init();
+
+    if (curl) {
+        do {
+            readBuffer.clear();
+            curl_easy_setopt(curl, CURLOPT_URL, "https://api.spotify.com/v1/me");
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+            res = curl_easy_perform(curl);
+
+            if (readBuffer.empty()) {
+                std::cout << "Empty response received!" << std::endl;
+                break;
+            }
+
+            try {
+                json response = json::parse(readBuffer);
+
+                userName = response["display_name"];
+                first_request = false;
+
+            } catch(json::exception e) {
+                break;
+            }
+        }while (first_request);
+
+
+
+        curl_slist_free_all(header);
+        curl_easy_cleanup(curl);
+
+        std::cout << readBuffer << std::endl;
+
+        return userName;
+    }
+    return userName;
+}
+
+
+std::string create_playlist(std::string accessToken, std::string userName, std::string playlistName) {
+    std::string new_playlistID;
+    struct curl_slist *header = NULL;
+    CURL *curl;
+    CURLcode res;
+    std::string readBuffer;
+
+    std::string GrantType = "Authorization: Bearer ";
+    std::string authBearerToken = GrantType + accessToken;
+
+    // making our header
+    header = curl_slist_append(NULL, authBearerToken.c_str());
+    header = curl_slist_append(header, "Content-Type: application/json");
+
+
+    std::string body_parameters = "{"
+    "\"name\":\"" + playlistName + "\","
+    "\"description\":\"this is a copy\","
+    "\"public\":true"
+    "}";
+
+
+    curl = curl_easy_init();
+    if (curl) {
+        readBuffer.clear();
+
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_parameters.c_str());
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.spotify.com/v1/me/playlists");
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_data);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+        res = curl_easy_perform(curl);
+
+
+        curl_slist_free_all(header);
+        curl_easy_cleanup(curl);
+
+        std::cout << readBuffer << std::endl;
+
+        return new_playlistID;
+    }
+    return new_playlistID;
+}
+
 
 int main()
 {
@@ -306,6 +409,16 @@ int main()
     std::vector<std::string> likedSongs = getLikedSongs(oAuthToken);
 
     std::vector<std::string> matchingSongs = compare_lists(likedSongs, playlistData);
+
+    // get username
+    std::string userName = getUsername(oAuthToken);
+    std::cout << "Spotify Username: " << userName << std::endl;
+
+
+    // create playlsit
+    std::string playlistName = "playlist test 2";
+    std::string new_playlistID = create_playlist(oAuthToken, userName, playlistName);
+    std::cout << "new playlists id: " << std::endl;
 
 
 
