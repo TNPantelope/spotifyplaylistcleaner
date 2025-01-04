@@ -277,19 +277,6 @@ std::vector<std::string> getPlaylistData(std::string accessToken, std::string pl
 
 std::vector<std::string> get_unique_songs(std::vector<std::string> likedsongslist, std::vector<std::string> playlistsongslist) {
     std::vector<std::string> uniqueSongs;
-
-    /*
-    for (const std::string &likedSong: likedsongslist) {
-        for (const std::string &playlistSong: playlistsongslist) {
-            if (likedSong == playlistSong) {
-                matchingSongs.push_back(likedSong);
-                break;
-            }
-        }
-    }
-    */
-
-
     for (const std::string &playlistSong: playlistsongslist) {
         bool songisLiked = false;
         for (const std::string &likedSong: likedsongslist) {
@@ -305,7 +292,19 @@ std::vector<std::string> get_unique_songs(std::vector<std::string> likedsongslis
     return uniqueSongs;
 }
 
-
+std::vector<std::string> get_matching_songs(std::vector<std::string> playlistsongslist,
+                                            std::vector<std::string> likedsongslist) {
+    std::vector<std::string> matchingSongs;
+    for (const std::string &likedSong: likedsongslist) {
+        for (const std::string &playlistSong: playlistsongslist) {
+            if (likedSong == playlistSong) {
+                matchingSongs.push_back(likedSong);
+                break;
+            }
+        }
+    }
+    return matchingSongs;
+}
 
 
 
@@ -486,6 +485,7 @@ int main() {
     std::vector<std::string> likedSongs = getLikedSongs(oAuthToken);
 
     std::vector<std::string> uniqueSongs = get_unique_songs(likedSongs, playlistData);
+    std::vector<std::string> matchingSongs = get_matching_songs(likedSongs, playlistData);
 
     // get username
     std::string userName = getUsername(oAuthToken);
@@ -505,6 +505,8 @@ int main() {
     std::cout << "\n";
 
     // Za prints
+    std::cout << "how many matching songs: " << matchingSongs.size() << std::endl;
+
     std::cout << "how many unique songs: " << uniqueSongs.size() << std::endl;
 
     std::cout << "how many songs in playlist: " << playlistData.size() << std::endl;
