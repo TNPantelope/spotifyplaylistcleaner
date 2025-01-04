@@ -2,12 +2,11 @@
 #include <string>
 #include <curl/curl.h>
 #include "auth_server.h"
-#include "json.hpp" // for JSON parsing
+#include "json.hpp"
 
 using json = nlohmann::json;
 
-std::string client_id = "a24ea60b20244fd299abb97fc9ce2ce5";
-std::string client_secret = "dd43497448614f0dbd9469726b50f673";
+
 
 // helper function to process the data we curl up
 static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
@@ -37,7 +36,7 @@ static std::string base64_encode(const std::string &in) {
     return out;
 }
 
-std::string webserver() {
+std::string webserver(std::string client_id, std::string client_secret) {
     std::string redirect_uri = "http://localhost:8888/callback";
     std::string scope =
             "user-read-private%20user-read-email%20user-library-read%20playlist-modify-public%20playlist-read-private%20playlist-modify-private";;
@@ -54,11 +53,12 @@ std::string webserver() {
             "&redirect_uri=" + redirect_uri +
             "&scope=" + scope;
 
-    std::cout << "open this url:\n" << auth_url << std::endl;
+    std::cout << "click this link to log into spotify:\n" << auth_url << std::endl;
 
     // waiting for user to go authenticate
     std::cout << "waiting for auth, press enter to continue" << std::endl;
     std::cin.get();
+
 
     // after enter
     auto received_oAuth_code = server.get_auth_code();
@@ -71,7 +71,7 @@ std::string webserver() {
     return received_oAuth_code;
 }
 
-std::string oAuth_to_token(std::string oAuth_code) {
+std::string oAuth_to_token(std::string oAuth_code, std::string client_id, std::string client_secret) {
     CURL *curl;
     CURLcode res;
     std::string readBuffer;
@@ -292,8 +292,7 @@ std::vector<std::string> get_unique_songs(std::vector<std::string> likedsongslis
     return uniqueSongs;
 }
 
-std::vector<std::string> get_matching_songs(std::vector<std::string> playlistsongslist,
-                                            std::vector<std::string> likedsongslist) {
+std::vector<std::string> get_matching_songs(std::vector<std::string> playlistsongslist, std::vector<std::string> likedsongslist) {
     std::vector<std::string> matchingSongs;
     for (const std::string &likedSong: likedsongslist) {
         for (const std::string &playlistSong: playlistsongslist) {
@@ -305,9 +304,6 @@ std::vector<std::string> get_matching_songs(std::vector<std::string> playlistson
     }
     return matchingSongs;
 }
-
-
-
 
 std::string getUsername(std::string accessToken) {
     std::string userName;
@@ -360,7 +356,6 @@ std::string getUsername(std::string accessToken) {
     return userName;
 }
 
-
 std::string create_playlist(std::string accessToken, std::string playlistName) {
     std::string new_playlistID;
     struct curl_slist *header = NULL;
@@ -375,13 +370,11 @@ std::string create_playlist(std::string accessToken, std::string playlistName) {
     header = curl_slist_append(NULL, authBearerToken.c_str());
     header = curl_slist_append(header, "Content-Type: application/json");
 
-
     std::string body_parameters = "{"
                                   "\"name\":\"" + playlistName + "\","
-                                  "\"description\":\"this is a copy\","
+                                  "\"description\":\"Hello World!\","
                                   "\"public\":true"
                                   "}";
-
 
     curl = curl_easy_init();
     if (curl) {
@@ -414,10 +407,8 @@ std::string create_playlist(std::string accessToken, std::string playlistName) {
 
         return new_playlistID;
     }
-
     return new_playlistID;
 }
-
 
 void fill_new_playlist(std::string accessToken, std::string playlistID, std::vector<std::string> list_of_songs) {
     struct curl_slist *header = NULL;
@@ -436,8 +427,7 @@ void fill_new_playlist(std::string accessToken, std::string playlistID, std::vec
 
     int i = 0;
     while (i < list_of_songs.size()) {
-        // filling in the list of songs we boutta put in this b
-
+        // filling in the list of songs we boutta put in this bitch
         std::string body_parameters =
                 "{"
                 "\"uris\":[\"spotify:track:" + list_of_songs[i] + "\"]"
@@ -461,55 +451,84 @@ void fill_new_playlist(std::string accessToken, std::string playlistID, std::vec
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
             res = curl_easy_perform(curl);
-
-
-
             i++;
         }
-
-
     }
     curl_slist_free_all(header);
     curl_easy_cleanup(curl);
-    std::cout << "should be there now" << std::endl;
+    std::cout << "think it worked, check your playlists" << std::endl;
 }
 
 int main() {
-    std::string playlistID = "1H9FE8NW6n3BObXmnjNrb7";
+
+    std::string playlistID = "77E0vwfdvfAewRko2wfod0";
+    std::string client_id = "a24ea60b20244fd299abb97fc9ce2ce0";
+    std::string client_secret = "dd43497448614f0dbd9469726b50f670";
+    std::string newplaylistName = "new playlist";
+
+
+    std::cerr << "---Dont misstype, if you do something wrong you finna have to start all over. (press enter to continue)---" << std::endl;
+    std::cin.get();
+    std::cout << "---------------------------------------INFO:---------------------------------------"
+                 "\n- To use this program you need to get set up with the spotify api."
+                 "\n- Go to developer.spotify.com and log into the dashboard using your spotify account."
+                 "\n- Set http://localhost:8888/callback as the redirect URI, select Web Api, and click Save."
+                 "\n- Click settings, note Client ID, click view client secret and note that down as well. "
+                 "\n- You also need the playlist id of the playlist you want cleaned up. You can find the id within the playlist url. "
+                 "\n  The id is the numbers after playlist/ and before the ? "
+                 "\n  For a link like this: https://open.spotify.com/playlist/7axCy8ti9svTLdhZogIKqo?si=e496b51d71184c69 the id would be 7axCy8ti9svTLdhZogIKqo. For more details read readme"
+                 "\n- This program creates a copy of the playlist, it doesnt modify the playlist you provide and it does NOT work with playlists made by spotify themselves idk why :(" << std::endl;
+    std::cout << "\n";
+    std::cout << "\n";
+    std::cout << "\n";
+    std::cout << "hello hello, welcome to spotify playlist cleaner! (press enter to continue)" << std::endl;
+    std::cout << "\n";
+    std::cin.get();
+    std::cout << "Enter your client id and client secret below, press enter after each one. For how to find client id and secret read readme " << std::endl;
+    std::cout << "\n";
+    std::cout << "Enter your client id:";
+    std::getline(std::cin, client_id);
+    std::cout << "Enter your client secret:";
+    std::getline(std::cin, client_secret);
 
     //gets oauth code using webserver func, passes that into oAuth to token, stores that token in oAuthToken
-    std::string oAuthToken = oAuth_to_token(webserver());
+    std::string oAuthToken = oAuth_to_token(webserver(client_id, client_secret), client_id, client_secret);
 
-    // pass the auth token to these various funtions
-    std::vector<std::string> playlistData = getPlaylistData(oAuthToken, playlistID);
+
+    std::cout << "alright, now just type in the id of the playlist you want cleaned up. For how to find playlist id read readme " << std::endl;
+
+    std::cout << "Enter your playlist id (the one that you want cleaned up):";
+    std::getline(std::cin, playlistID);
+
+
+    std::cout << "And what do you want this new playlist to be called?:";
+    std::getline(std::cin, newplaylistName);
+
+
+    std::cout << "if you have a lot of liked songs and/or if youre trying to clean up a big playlist this can take a long time" << std::endl;
+
+    // do the stuff
+    std::vector<std::string> playlistSongs = getPlaylistData(oAuthToken, playlistID);
     std::vector<std::string> likedSongs = getLikedSongs(oAuthToken);
+    std::vector<std::string> uniqueSongs = get_unique_songs(likedSongs, playlistSongs);
+    std::vector<std::string> matchingSongs = get_matching_songs(likedSongs, playlistSongs);
 
-    std::vector<std::string> uniqueSongs = get_unique_songs(likedSongs, playlistData);
-    std::vector<std::string> matchingSongs = get_matching_songs(likedSongs, playlistData);
-
-    // get username
     std::string userName = getUsername(oAuthToken);
-    std::cout << "Spotify Username: " << userName << std::endl;
-
-
-    // create playlsit
-    std::string playlistName = "test slist";
-    std::string new_playlistID = create_playlist(oAuthToken, playlistName);
-    std::cout << "new playlists id: " << new_playlistID << std::endl;
-
-
-    std::string list_of_songs;
+    std::string new_playlistID = create_playlist(oAuthToken, newplaylistName);
     fill_new_playlist(oAuthToken, new_playlistID, uniqueSongs);
-
 
     std::cout << "\n";
 
     // Za prints
+    std::cout << "Spotify Username: " << userName << std::endl;
+
+    std::cout << "new playlists' id and name: " << new_playlistID << ", " << newplaylistName << std::endl;
+
     std::cout << "how many matching songs: " << matchingSongs.size() << std::endl;
 
     std::cout << "how many unique songs: " << uniqueSongs.size() << std::endl;
 
-    std::cout << "how many songs in playlist: " << playlistData.size() << std::endl;
+    std::cout << "how many songs in playlist: " << playlistSongs.size() << std::endl;
 
     std::cout << "how many liked songs: " << likedSongs.size() << std::endl;
 

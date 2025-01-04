@@ -18,7 +18,7 @@ void AuthServer::handle_callback(web::http::http_request request) {
 
     if (query.find(U("code")) != query.end()) {
         auth_code = query[U("code")];
-        request.reply(status_codes::OK, U("Authorization successful, close window"));
+        request.reply(status_codes::OK, U("Authorization successful, you can close window and go back"));
     } else {
         request.reply(status_codes::BadRequest, U("auth code not received"));
     }
