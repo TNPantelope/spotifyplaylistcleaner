@@ -276,7 +276,7 @@ std::vector<std::string> getPlaylistData(std::string accessToken, std::string pl
 }
 
 std::vector<std::string> get_unique_songs(std::vector<std::string> likedsongslist, std::vector<std::string> playlistsongslist) {
-    std::vector<std::string> matchingSongs;
+    std::vector<std::string> uniqueSongs;
 
     /*
     for (const std::string &likedSong: likedsongslist) {
@@ -289,16 +289,23 @@ std::vector<std::string> get_unique_songs(std::vector<std::string> likedsongslis
     }
     */
 
+
     for (const std::string &playlistSong: playlistsongslist) {
+        bool songisLiked = false;
         for (const std::string &likedSong: likedsongslist) {
-            if (playlistSong != likedSong) {
-                matchingSongs.push_back(playlistSong);
+            if (playlistSong == likedSong) {
+                songisLiked = true;
                 break;
             }
         }
+        if (!songisLiked) {
+            uniqueSongs.push_back(playlistSong);
+        }
     }
-    return matchingSongs;
+    return uniqueSongs;
 }
+
+
 
 
 
