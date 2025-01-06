@@ -11,7 +11,13 @@ Same, this is a tool that removes liked songs from playlists. Unfortunately this
 
 ## Installation
 
-coming soon
+Clone the repository
+
+### Prerequisites
+- C++ compiler (GCC 8+ or equivalent)
+- CMake (version 3.10 or higher)
+
+
 
 ## Usage
 
