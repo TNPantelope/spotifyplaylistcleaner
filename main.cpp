@@ -3,6 +3,7 @@
 #include <curl/curl.h>
 #include "auth_server.h"
 #include "json.hpp"
+#include <cpprest/details/basic_types.h>
 
 using json = nlohmann::json;
 
@@ -68,7 +69,7 @@ std::string webserver(std::string client_id, std::string client_secret) {
 
     server.stop();
 
-    return received_oAuth_code;
+    return utility::conversions::to_utf8string(received_oAuth_code);
 }
 
 std::string oAuth_to_token(std::string oAuth_code, std::string client_id, std::string client_secret) {
@@ -462,8 +463,8 @@ void fill_new_playlist(std::string accessToken, std::string playlistID, std::vec
 int main() {
 
     std::string playlistID = "77E0vwfdvfAewRko2wfod0";
-    std::string client_id = "a24ea60b20244fd299abb97fc9ce2ce0";
-    std::string client_secret = "dd43497448614f0dbd9469726b50f670";
+    std::string client_id = "";
+    std::string client_secret = "";
     std::string newplaylistName = "new playlist";
 
 

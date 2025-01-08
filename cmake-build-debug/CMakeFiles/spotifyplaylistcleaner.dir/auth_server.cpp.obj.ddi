@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "CMakeFiles\\spotifyplaylistcleaner.dir\\auth_server.cpp.obj",
+            "outputs": [
+                "E:\\PersonalProjects\\spotifyplaylistcleaner\\cmake-build-debug\\vc140.pdb",
+                "CMakeFiles\\spotifyplaylistcleaner.dir\\auth_server.cpp.obj.ddi"
+            ],
+            "requires": []
+        }
+    ]
+}
