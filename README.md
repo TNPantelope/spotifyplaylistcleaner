@@ -14,6 +14,20 @@ Same, this is a tool that removes liked songs from playlists. Unfortunately this
 - Spotify Developer Account
 - cpprestsdk
 
+## Installation
+1. Clone the repository
+    ```
+    git clone https://github.com/yourusername/spotifyplaylistcleaner.git
+    ```
+
+2. [Set up Spotify Developer Account](https://developer.spotify.com/dashboard)
+    - Log in with your Spotify account
+    - Create a new application
+    - Set `http://localhost:8888/callback` as the Redirect URI (the rest can be whatever)
+    - Note down your Client ID and Client Secret
+
+3. Follow the setup instructions for your os below
+
 ## Windows Setup
 1. Install vcpkg:
     ```
