@@ -1,5 +1,0 @@
-ninja_dyndep_version = 1.0
-build CMakeFiles\spotifyplaylistcleaner.dir\main.cpp.obj: dyndep
-
-build CMakeFiles\spotifyplaylistcleaner.dir\auth_server.cpp.obj: dyndep
-
