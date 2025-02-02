@@ -3,8 +3,8 @@
 *
 
 # Set these files to the correct language
-*.cpp linguist-language=C++
-auth_server.h linguist-language=C++
+*.cpp linguist-language=cpp
+auth_server.h linguist-language=cpp
 
 # Except these
 !main.cpp
