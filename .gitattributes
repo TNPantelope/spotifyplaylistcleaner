@@ -1,3 +1,14 @@
 
-json.hpp linguist-vendored
-include/* linguist-vendored
+# Ignore everything
+*
+
+# Set these files to the correct language
+*.cpp linguist-language=C++
+auth_server.h linguist-language=C++
+
+# Except these
+!main.cpp
+!auth_server.h
+!auth_server.cpp
+
+
